@@ -11,6 +11,9 @@ namespace api_clinic.src.Models
 
         [BsonElement("planId")]
         public string PlanId { get; set; } = string.Empty;
+        
+        [BsonElement("asaasId")]
+        public string AsaasId { get; set; } = string.Empty;
 
         [BsonElement("cnpj")]
         public string Cnpj { get; set; } = string.Empty;

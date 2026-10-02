@@ -3,6 +3,7 @@ using api_clinic.src.Repository;
 using api_clinic.src.Services;
 using api_clinic.src.Infraestructure;
 using api_clinic.src.Helpers;
+using api_clinic.src.Handlers;
 
 namespace api_clinic.src.Configuration
 {
@@ -40,6 +41,8 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IPlanRepository, PlanRepository>();
 
             builder.Services.AddTransient<IClinicRepository, ClinicRepository>();
+
+            builder.Services.AddSingleton<AsaasHandler>();
         }
     }
 }

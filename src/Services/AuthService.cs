@@ -9,6 +9,7 @@ using api_clinic.src.Models.Base;
 using api_clinic.src.Requests;
 using api_clinic.src.Shared.Utils;
 using api_clinic.src.Requests.User;
+using api_clinic.src.Handlers;
 
 namespace api_clinic.src.Services
 {
@@ -16,6 +17,7 @@ namespace api_clinic.src.Services
         IUserRepository userRepository,
         IPlanRepository planRepository,
         IClinicRepository clinicRepository,
+        AsaasHandler asaasHandler,
         MailHelper mailHelper
     ) : IAuthService
     {
@@ -26,6 +28,9 @@ namespace api_clinic.src.Services
             {
                 ResponseApi<User?> existed = await userRepository.GetByEmailAsync(request.Email);
                 if (existed.Data is not null) return new(null, 400, "E-mail inválido, tente usar outro");
+
+                AsaasCustomerResponse? asaasCustomer = await asaasHandler.GetOrCreateCustomerAsync(request.CorporateName, request.Cnpj, request.Email, request.Phone);
+                if (asaasCustomer is null) return new(null, 400, "E-mail inválido, tente usar outro");
 
                 dynamic access = Util.GenerateCodeAccess();
 
@@ -44,7 +49,8 @@ namespace api_clinic.src.Services
                     Email = request.Email,  
                     Phone = request.Phone,  
                     Address = request.Address,
-                    PlanId = plan.Id  
+                    PlanId = plan.Id,
+                    AsaasId = asaasCustomer.Id
                 };
 
                 await clinicRepository.CreateAsync(clinic);
@@ -69,9 +75,9 @@ namespace api_clinic.src.Services
 
                 return new(new { name = user.Name }, 201, "Usuário criado com sucesso.");
             }
-            catch
+            catch(Exception ex)
             {
-                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde");
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde - {ex.Message}");
             }
         }
         public async Task<ResponseApi<dynamic?>> CreateAsync(CreateUserDTO request)

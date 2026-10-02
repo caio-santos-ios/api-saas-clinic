@@ -14,7 +14,7 @@ builder.AddContext();
 builder.AddBuilderServices();
 builder.AddBuilderHelpers();
 builder.Services.AddControllers();
-builder.WebHost.UseUrls("http://0.0.0.0:5140");
+// builder.WebHost.UseUrls("http://0.0.0.0:5140");
 
 builder.Services.AddAuthentication(options =>
 {
