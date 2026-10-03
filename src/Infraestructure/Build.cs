@@ -38,6 +38,9 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IDashboardService, DashboardService>();
             builder.Services.AddTransient<IDashboardRepository, DashboardRepository>();
             
+            builder.Services.AddTransient<IAttachmentService, AttachmentService>();
+            builder.Services.AddTransient<IAttachmentRepository, AttachmentRepository>();
+            
             builder.Services.AddTransient<IPlanService, PlanService>();
             builder.Services.AddTransient<IPlanRepository, PlanRepository>();
 
@@ -47,6 +50,7 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<ISignatureRepository, SignatureRepository>();
 
             builder.Services.AddSingleton<AsaasHandler>();
+            builder.Services.AddHttpClient<UploadHelper>();
         }
     }
 }

@@ -60,6 +60,15 @@ namespace api_clinic.src.Controllers
             ResponseApi<Attachment?> response = await service.CreateAsync(request);
             return StatusCode(response.StatusCode, response.Result);
         }
+        
+        [HttpPost("logo")]
+        public async Task<IActionResult> UploadLogo([FromForm] CreateAttachmentRequest request)
+        {
+            if (request == null) return BadRequest("Dados inválidos.");
+            request.CreatedBy = null!;
+            ResponseApi<Attachment?> response = await service.CreateAsync(request);
+            return StatusCode(response.StatusCode, response.Result);
+        }
 
         [Authorize]
         [HttpPut]
