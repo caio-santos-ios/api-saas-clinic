@@ -38,9 +38,13 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IDashboardService, DashboardService>();
             builder.Services.AddTransient<IDashboardRepository, DashboardRepository>();
             
+            builder.Services.AddTransient<IPlanService, PlanService>();
             builder.Services.AddTransient<IPlanRepository, PlanRepository>();
 
             builder.Services.AddTransient<IClinicRepository, ClinicRepository>();
+
+            builder.Services.AddTransient<ISignatureService, SignatureService>();
+            builder.Services.AddTransient<ISignatureRepository, SignatureRepository>();
 
             builder.Services.AddSingleton<AsaasHandler>();
         }

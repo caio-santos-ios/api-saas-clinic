@@ -15,8 +15,8 @@ namespace api_clinic.src.Services
 {
     public class AuthService(
         IUserRepository userRepository,
-        IPlanRepository planRepository,
         IClinicRepository clinicRepository,
+        ISignatureRepository signatureRepository,
         AsaasHandler asaasHandler,
         MailHelper mailHelper
     ) : IAuthService
@@ -34,29 +34,37 @@ namespace api_clinic.src.Services
 
                 dynamic access = Util.GenerateCodeAccess();
 
-                Plan plan = new ()
-                {
-                    Type = "free"  
-                };
-
-                await planRepository.CreateAsync(plan);
-
                 Clinic clinic = new()
                 {
-                    Cnpj = request.Cnpj,  
-                    TradeName = request.TradeName,  
-                    CorporateName = request.CorporateName,  
-                    Email = request.Email,  
-                    Phone = request.Phone,  
+                    Cnpj = request.Cnpj,
+                    TradeName = request.TradeName,
+                    CorporateName = request.CorporateName,
+                    Email = request.Email,
+                    Phone = request.Phone,
                     Address = request.Address,
-                    PlanId = plan.Id,
-                    AsaasId = asaasCustomer.Id
+                    Setting = request.Setting
                 };
 
                 await clinicRepository.CreateAsync(clinic);
 
+                DateTime today = DateTime.Now;
+                Signature signature = new()
+                {
+                    ClinicId = clinic.Id,
+                    AsaasCustomerId = asaasCustomer.Id,
+                    AsaasSubscriptionId = "",
+                    NextDueDate = today.AddDays(30),
+                    EndDate = today.AddDays(30),
+                    StartDate = today,
+                    Status = "PENDENTE",
+                    PlanId = request.PlanId
+                };
+
+                await signatureRepository.CreateAsync(signature);
+
                 User user = new()
                 {
+                    ClinicId = clinic.Id,
                     Email = request.Email,
                     Name = "Administrador",
                     Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
@@ -73,9 +81,9 @@ namespace api_clinic.src.Services
 
                 await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
 
-                return new(new { name = user.Name }, 201, "Usuário criado com sucesso.");
+                return new(new { name = user.Name }, 201, "Conta criada com sucesso, verifique o seu e-mail de confirmação da conta.");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde - {ex.Message}");
             }
@@ -161,11 +169,18 @@ namespace api_clinic.src.Services
 
                 await userRepository.UpdateAsync(response.Data);
 
-                return new(new { Token = GenerateJwtToken(response.Data), RefreshToken = GenerateJwtToken(response.Data, true), response.Data.Photo, response.Data.Name, admin = response.Data.Admin.ToString() }, 200, "Login feito com sucesso.");
+                Clinic? clinic = await clinicRepository.GetByIdAsync(response.Data.ClinicId);
+                if (clinic is null) return new(null, 400, "Falha ao fazer login");
+
+                Signature? signature = await signatureRepository.GetByClinicIdAsync(clinic.Id);
+                string signatureStatus = signature is not null ? signature.Status : "PENDENTE";
+                string signatureId = signature is not null ? signature.Id : "";
+
+                return new(new { Token = GenerateJwtToken(response.Data), RefreshToken = GenerateJwtToken(response.Data, true), response.Data.Photo, response.Data.Name, admin = response.Data.Admin.ToString(), accessProfile = response.Data.AccessProfile, signatureStatus, signatureId }, 200, "Login feito com sucesso.");
             }
-            catch
+            catch(Exception ex)
             {
-                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde");
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde - {ex.Message}");
             }
         }
         #endregion
@@ -283,6 +298,8 @@ namespace api_clinic.src.Services
                 new Claim("name", user.Name),
                 new Claim("photo", user.Photo),
                 new Claim("admin", user.Admin.ToString()),
+                new Claim("accessProfile", user.AccessProfile),
+                new Claim("clinicId", user.ClinicId)
             ];
 
             SigningCredentials creds = new(key, SecurityAlgorithms.HmacSha256);

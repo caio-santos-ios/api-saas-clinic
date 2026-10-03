@@ -22,6 +22,8 @@ namespace api_clinic.src.Requests.User
 
         [Required(ErrorMessage = "A Senha é obrigatória.")]
         public string Password { get; set; } = string.Empty;
+        public string PlanId { get; set; } = string.Empty;
         public AddressClinic Address { get; set; } = new();
+        public SettingClinic Setting { get; set; } = new();
     }
 }
