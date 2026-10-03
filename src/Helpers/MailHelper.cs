@@ -1,5 +1,4 @@
-using MailKit.Net.Smtp;
-using MimeKit;
+using api_clinic.src.Models;
 
 namespace api_clinic.src.Helpers
 {
@@ -37,6 +36,22 @@ namespace api_clinic.src.Helpers
             {
                 return ex.Message;
             }
+        }
+
+        public async Task<string> SendAccountConfirmationMail(string recipient, string name, string code, Clinic? clinic = null)
+        {
+            string nameClinic = clinic is not null && !string.IsNullOrWhiteSpace(clinic.TradeName) ? clinic.TradeName : "ClinicSaaS";
+            string subject = $"Confirmação de Cadastro — {nameClinic}";
+            string body = EmailTemplates.GetAccountConfirmationTemplate(name, code, clinic);
+            return await SendMail(recipient, subject, body);
+        }
+
+        public async Task<string> SendPasswordResetMail(string recipient, string name, string code, Clinic? clinic = null)
+        {
+            string nameClinic = clinic is not null && !string.IsNullOrWhiteSpace(clinic.TradeName) ? clinic.TradeName : "ClinicSaaS";
+            string subject = $"Redefinição de Senha — {nameClinic}";
+            string body = EmailTemplates.GetPasswordResetTemplate(name, code, clinic);
+            return await SendMail(recipient, subject, body);
         }
     }
 }

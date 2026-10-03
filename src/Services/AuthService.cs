@@ -79,7 +79,7 @@ namespace api_clinic.src.Services
                 ResponseApi<User?> response = await userRepository.CreateAsync(user);
                 if (response.Data is null) return new(null, 400, "Falha ao criar conta.");
 
-                await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
+                await mailHelper.SendAccountConfirmationMail(request.Email, user.Name, access.CodeAccess, clinic);
 
                 return new(new { name = user.Name, signatureId = signature.Id, clinicId = clinic.Id }, 201, "Conta criada com sucesso, verifique o seu e-mail de confirmação da conta.");
             }
@@ -111,7 +111,7 @@ namespace api_clinic.src.Services
                 ResponseApi<User?> response = await userRepository.CreateAsync(user);
                 if (response.Data is null) return new(null, 400, "Falha ao criar conta.");
 
-                await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
+                await mailHelper.SendAccountConfirmationMail(request.Email, user.Name, access.CodeAccess);
 
                 return new(new { name = user.Name }, 201, "Usuário criado com sucesso.");
             }
@@ -140,7 +140,13 @@ namespace api_clinic.src.Services
 
                     await userRepository.UpdateAsync(response.Data);
 
-                    await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {generateCode.CodeAccess}");
+                    Clinic? userClinic = null;
+                    if (!string.IsNullOrEmpty(response.Data.ClinicId))
+                    {
+                        userClinic = await clinicRepository.GetByIdAsync(response.Data.ClinicId);
+                    }
+
+                    await mailHelper.SendAccountConfirmationMail(request.Email, response.Data.Name, generateCode.CodeAccess, userClinic);
 
                     return new(null, 400, "Conta não foi confirmada, enviamos um e-mail de confirmação novamente");
                 }
@@ -199,7 +205,13 @@ namespace api_clinic.src.Services
 
                 await userRepository.UpdateAsync(response.Data);
 
-                var res = await mailHelper.SendMail(response.Data.Email, "Código de Verificação", $"Seu código de veficação: {generateCode.CodeAccess}");
+                Clinic? clinic = null;
+                if (!string.IsNullOrEmpty(response.Data.ClinicId))
+                {
+                    clinic = await clinicRepository.GetByIdAsync(response.Data.ClinicId);
+                }
+
+                var res = await mailHelper.SendPasswordResetMail(response.Data.Email, response.Data.Name, generateCode.CodeAccess, clinic);
 
                 return new(new { }, 200, "Foi enviado um código de verificação para o e-mail.");
             }
@@ -271,7 +283,13 @@ namespace api_clinic.src.Services
 
                 await userRepository.UpdateAsync(response.Data);
 
-                var res = await mailHelper.SendMail(response.Data.Email, "Código de Verificação", $"Seu código de veficação: {generateCode.CodeAccess}");
+                Clinic? clinic = null;
+                if (!string.IsNullOrEmpty(response.Data.ClinicId))
+                {
+                    clinic = await clinicRepository.GetByIdAsync(response.Data.ClinicId);
+                }
+
+                var res = await mailHelper.SendAccountConfirmationMail(response.Data.Email, response.Data.Name, generateCode.CodeAccess, clinic);
 
                 return new(new { }, 200, "Foi enviado um código de verificação para o e-mail.");
             }

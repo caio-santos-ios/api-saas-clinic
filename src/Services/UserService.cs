@@ -82,7 +82,7 @@ namespace api_clinic.src.Services
                 ResponseApi<User?> response = await repository.CreateAsync(user);
                 if (response.Data is null) return new(null, 400, "Falha ao criar conta.");
 
-                await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
+                await mailHelper.SendAccountConfirmationMail(request.Email, user.Name, access.CodeAccess);
 
                 return new(null, 201, "Usuário criado com sucesso.");
             }
@@ -159,7 +159,7 @@ namespace api_clinic.src.Services
 
                         await repository.UpdateAsync(existed.Data);
 
-                        await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
+                        await mailHelper.SendAccountConfirmationMail(request.Email, existed.Data.Name, access.CodeAccess);
                         return new(null, 404, "Código inválido, foi enviado um novo para o seu e-mail");
                     }
                     return new(null, 404, "Código inválido");
