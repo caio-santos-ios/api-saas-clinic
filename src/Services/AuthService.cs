@@ -81,7 +81,7 @@ namespace api_clinic.src.Services
 
                 await mailHelper.SendMail(request.Email, "Código de Confirmação", $"Seu código de confirmação: {access.CodeAccess}");
 
-                return new(new { name = user.Name }, 201, "Conta criada com sucesso, verifique o seu e-mail de confirmação da conta.");
+                return new(new { name = user.Name, signatureId = signature.Id, clinicId = clinic.Id }, 201, "Conta criada com sucesso, verifique o seu e-mail de confirmação da conta.");
             }
             catch (Exception ex)
             {

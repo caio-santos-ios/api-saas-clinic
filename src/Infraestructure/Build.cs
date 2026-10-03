@@ -49,6 +49,9 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<ISignatureService, SignatureService>();
             builder.Services.AddTransient<ISignatureRepository, SignatureRepository>();
 
+            builder.Services.AddTransient<IProfileDoctorService, ProfileDoctorService>();
+            builder.Services.AddTransient<IProfileDoctorRepository, ProfileDoctorRepository>();
+
             builder.Services.AddSingleton<AsaasHandler>();
             builder.Services.AddHttpClient<UploadHelper>();
         }

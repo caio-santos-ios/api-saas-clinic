@@ -62,7 +62,7 @@ namespace api_clinic.src.Handlers
                     value,
                     nextDueDate,
                     cycle = "MONTHLY",
-                    description = "Assinatura ERP Telemovvi",
+                    description = "Assinatura Saas Clínica",
                     creditCard = new
                     {
                         holderName = card.HolderName,
@@ -91,7 +91,7 @@ namespace api_clinic.src.Handlers
                     value,
                     nextDueDate,
                     cycle = "MONTHLY",
-                    description = "Assinatura ERP Telemovvi"
+                    description = "Assinatura Saas Clínica"
                 };
             }
 

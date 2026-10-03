@@ -12,6 +12,8 @@ namespace api_clinic.src.Interfaces
         Task<dynamic?> GetByIdAggregateAsync(List<BsonDocument> pipeline);
         Task<Signature?> GetByIdAsync(string id);
         Task<Signature?> GetByClinicIdAsync(string clinicId);
+        Task<Signature?> GetByAsaasSubscriptionIdAsync(string asaasSubscriptionId);
+        Task<Signature?> GetByAsaasCustomerIdAsync(string asaasCustomerId);
         Task<Signature?> CreateAsync(Signature entity);
         Task<Signature?> UpdateAsync(Signature entity);
         Task<Signature> DeleteAsync(Signature entity);

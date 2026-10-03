@@ -87,6 +87,18 @@ namespace api_clinic.src.Repository
             return entity;
         }
 
+        public async Task<Signature?> GetByAsaasSubscriptionIdAsync(string asaasSubscriptionId)
+        {
+            Signature? entity = await context.Signatures.Find(x => x.AsaasSubscriptionId == asaasSubscriptionId && !x.Deleted).FirstOrDefaultAsync();
+            return entity;
+        }
+
+        public async Task<Signature?> GetByAsaasCustomerIdAsync(string asaasCustomerId)
+        {
+            Signature? entity = await context.Signatures.Find(x => x.AsaasCustomerId == asaasCustomerId && !x.Deleted).SortByDescending(x => x.CreatedAt).FirstOrDefaultAsync();
+            return entity;
+        }
+
         public async Task<int> GetCountDocumentsAsync(PaginationUtil<Signature> pagination)
         {
             List<BsonDocument> pipeline = new()

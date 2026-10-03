@@ -13,5 +13,7 @@ namespace api_clinic.src.Interfaces
         Task<ResponseApi<Signature?>> CreateAsync(CreateSignatureRequest request);
         Task<ResponseApi<Signature?>> UpdateAsync(UpdateSignatureRequest request);
         Task<ResponseApi<Signature>> DeleteAsync(DeleteDTO request);
+        Task<ResponseApi<dynamic?>> ProcessWebhookAsync(AsaasWebhookRequest request);
+        Task<ResponseApi<dynamic?>> SubscribeAsync(SubscribePlanRequest request);
     }
 }

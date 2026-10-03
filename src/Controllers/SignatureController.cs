@@ -47,6 +47,25 @@ namespace api_clinic.src.Controllers
             return StatusCode(response.StatusCode, response.Result);
         }
 
+        [HttpPost("webhook")]
+        public async Task<IActionResult> WebHook([FromBody] AsaasWebhookRequest request)
+        {
+            var token = Request.Headers["asaas-access-token"].ToString();
+            if (token != Environment.GetEnvironmentVariable("ASAAS_WEBHOOK_TOKEN")) return Unauthorized();
+
+            if (request == null) return BadRequest("Dados inválidos.");
+            ResponseApi<dynamic?> response = await service.ProcessWebhookAsync(request);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [HttpPost("subscribe")]
+        public async Task<IActionResult> Subscribe([FromBody] SubscribePlanRequest request)
+        {
+            if (request == null) return BadRequest("Dados inválidos.");
+            ResponseApi<dynamic?> response = await service.SubscribeAsync(request);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
         [Authorize]
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateSignatureRequest request)

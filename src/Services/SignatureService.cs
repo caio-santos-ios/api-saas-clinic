@@ -1,3 +1,4 @@
+using api_clinic.src.Handlers;
 using api_clinic.src.Interfaces;
 using api_clinic.src.Models;
 using api_clinic.src.Models.Base;
@@ -11,7 +12,8 @@ namespace api_clinic.src.Services
     public class SignatureService(
         ISignatureRepository repository,
         IClinicRepository clinicRepository,
-        IPlanRepository planRepository
+        IPlanRepository planRepository,
+        AsaasHandler asaasHandler
     ) : ISignatureService
     {
         #region READ
@@ -53,6 +55,12 @@ namespace api_clinic.src.Services
                     {
                         {"_id", 0},
                         {"id", MongoUtil.ToString("$_id")},
+                        {"status", "$status"},
+                        {"paymentMethod", "$paymentMethod"},
+                        {"clinicId", "$clinicId"},
+                        {"planId", "$planId"},
+                        {"cycle", "$cycle"},
+                        {"value", "$value"},
                         {"clinicSetting", MongoUtil.First("_clinics.setting")},
                     })
                 ];
@@ -182,6 +190,231 @@ namespace api_clinic.src.Services
             catch
             {
                 return new(null, 500, "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde");
+            }
+        }
+        #endregion
+
+        #region WEBHOOK
+        public async Task<ResponseApi<dynamic?>> ProcessWebhookAsync(AsaasWebhookRequest request)
+        {
+            try
+            {
+                string? subscriptionId = request.Payment?.Subscription ?? request.Subscription?.Id;
+                Signature? signature = null;
+
+                if (!string.IsNullOrEmpty(subscriptionId))
+                {
+                    signature = await repository.GetByAsaasSubscriptionIdAsync(subscriptionId);
+                }
+
+                if (signature is null)
+                {
+                    string? customerId = request.Payment?.Customer ?? request.Subscription?.Customer;
+                    if (!string.IsNullOrEmpty(customerId))
+                    {
+                        signature = await repository.GetByAsaasCustomerIdAsync(customerId);
+                    }
+                }
+
+                if (signature is null)
+                {
+                    return new(null, 404, "Assinatura não encontrada");
+                }
+
+                switch (request.Event)
+                {
+                    case "PAYMENT_RECEIVED":
+                    case "PAYMENT_CONFIRMED":
+                        signature.Status = "ATIVO";
+                        if (request.Payment is not null && DateTime.TryParse(request.Payment.DueDate, out DateTime dueDate))
+                        {
+                            signature.NextDueDate = signature.Cycle == "yearly" ? dueDate.AddYears(1) : dueDate.AddMonths(1);
+                            signature.EndDate = signature.NextDueDate;
+                        }
+                        break;
+
+                    case "PAYMENT_OVERDUE":
+                        signature.Status = "VENCIDO";
+                        break;
+
+                    case "SUBSCRIPTION_DELETED":
+                    case "SUBSCRIPTION_INACTIVATED":
+                    case "PAYMENT_DELETED":
+                    case "PAYMENT_REFUNDED":
+                        signature.Status = "CANCELADO";
+                        break;
+
+                    default:
+                        break;
+                }
+
+                signature.UpdatedAt = DateTime.UtcNow;
+                await repository.UpdateAsync(signature);
+
+                return new(signature, 200, "Webhook processado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Erro ao processar webhook: {ex.Message}");
+            }
+        }
+        #endregion
+
+        #region SUBSCRIBE
+        public async Task<ResponseApi<dynamic?>> SubscribeAsync(SubscribePlanRequest request)
+        {
+            try
+            {
+                Signature? signature = null;
+
+                if (!string.IsNullOrEmpty(request.SignatureId))
+                {
+                    signature = await repository.GetByIdAsync(request.SignatureId);
+                }
+
+                if (signature is null && !string.IsNullOrEmpty(request.ClinicId))
+                {
+                    signature = await repository.GetByClinicIdAsync(request.ClinicId);
+                }
+
+                if (signature is null)
+                {
+                    return new(null, 404, "Assinatura não encontrada");
+                }
+
+                Clinic? clinic = await clinicRepository.GetByIdAsync(signature.ClinicId);
+                if (clinic is null)
+                {
+                    return new(null, 404, "Clínica não encontrada");
+                }
+
+                string planId = !string.IsNullOrEmpty(request.PlanId) ? request.PlanId : signature.PlanId;
+                Plan? plan = null;
+                if (ObjectId.TryParse(planId, out _))
+                {
+                    plan = await planRepository.GetByIdAsync(planId);
+                }
+
+                if (string.IsNullOrEmpty(signature.AsaasCustomerId))
+                {
+                    var customer = await asaasHandler.GetOrCreateCustomerAsync(clinic.CorporateName, clinic.Cnpj, clinic.Email, clinic.Phone);
+                    if (customer is not null)
+                    {
+                        signature.AsaasCustomerId = customer.Id;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(signature.AsaasCustomerId))
+                {
+                    return new(null, 400, "Falha ao vincular cliente no gateway de pagamento");
+                }
+
+                decimal value;
+                if (plan is not null)
+                {
+                    value = plan.Cost;
+                }
+                else
+                {
+                    value = (request.PlanId?.ToLower(), request.Cycle) switch
+                    {
+                        ("bronze", "yearly") => 199m,
+                        ("bronze", _) => 249m,
+                        ("prata", "yearly") => 399m,
+                        ("prata", _) => 499m,
+                        ("ouro", "yearly") => 719m,
+                        ("ouro", _) => 899m,
+                        _ => 249m
+                    };
+                }
+
+                string billingType = request.PaymentMethod.ToUpper() switch
+                {
+                    "BOLETO" => "BOLETO",
+                    "CREDIT_CARD" or "CARTAO" => "CREDIT_CARD",
+                    _ => "PIX"
+                };
+
+                string nextDueDate = DateTime.UtcNow.AddDays(3).ToString("yyyy-MM-dd");
+
+                AsaasSubscriptionResponse? subResponse = await asaasHandler.CreateSubscriptionAsync(
+                    signature.AsaasCustomerId,
+                    value,
+                    billingType,
+                    nextDueDate,
+                    request.CardData
+                );
+
+                if (subResponse is null || (subResponse.Errors is not null && subResponse.Errors.Count > 0))
+                {
+                    string errorMsg = subResponse?.Errors?.FirstOrDefault()?.Description ?? "Falha ao criar assinatura no gateway de pagamento";
+                    return new(null, 400, errorMsg);
+                }
+
+                signature.AsaasSubscriptionId = subResponse.Id;
+                if (plan is not null) signature.PlanId = plan.Id;
+                else if (!string.IsNullOrEmpty(request.PlanId)) signature.PlanId = request.PlanId;
+                signature.Cycle = request.Cycle;
+                signature.PaymentMethod = request.PaymentMethod;
+                signature.Value = value;
+                signature.Status = "PENDENTE";
+                signature.UpdatedAt = DateTime.UtcNow;
+                await repository.UpdateAsync(signature);
+
+                if (billingType == "PIX")
+                {
+                    var payment = await asaasHandler.GetLastPaymentFromSubscriptionAsync(subResponse.Id);
+                    if (payment is null)
+                    {
+                        await Task.Delay(1000);
+                        payment = await asaasHandler.GetLastPaymentFromSubscriptionAsync(subResponse.Id);
+                    }
+
+                    AsaasPixResponse? pix = payment is not null ? await asaasHandler.GetPixQrCodeAsync(payment.Id) : null;
+
+                    return new(new
+                    {
+                        signatureId = signature.Id,
+                        asaasSubscriptionId = subResponse.Id,
+                        paymentId = payment?.Id,
+                        pixQrCode = pix?.EncodedImage,
+                        pixCopyPaste = pix?.Payload,
+                        expirationDate = pix?.ExpirationDate
+                    }, 200, "Assinatura Pix gerada com sucesso");
+                }
+
+                if (billingType == "BOLETO")
+                {
+                    var payment = await asaasHandler.GetLastPaymentFromSubscriptionAsync(subResponse.Id);
+                    if (payment is null)
+                    {
+                        await Task.Delay(1000);
+                        payment = await asaasHandler.GetLastPaymentFromSubscriptionAsync(subResponse.Id);
+                    }
+
+                    AsaasBoletoResponse? boleto = payment is not null ? await asaasHandler.GetBoletoIdentificationFieldAsync(payment.Id) : null;
+
+                    return new(new
+                    {
+                        signatureId = signature.Id,
+                        asaasSubscriptionId = subResponse.Id,
+                        paymentId = payment?.Id,
+                        identificationField = boleto?.IdentificationField,
+                        barCode = boleto?.BarCode,
+                        bankSlipUrl = payment?.BankSlipUrl
+                    }, 200, "Boleto gerado com sucesso");
+                }
+
+                return new(new
+                {
+                    signatureId = signature.Id,
+                    asaasSubscriptionId = subResponse.Id,
+                    status = subResponse.Status
+                }, 200, "Assinatura processada com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro ao processar a assinatura: {ex.Message}");
             }
         }
         #endregion
