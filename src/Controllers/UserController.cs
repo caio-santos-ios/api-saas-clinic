@@ -33,7 +33,10 @@ namespace api_clinic.src.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetLoggedAsync()
         {
-            string id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            string id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value 
+                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+                ?? "";
             ResponseApi<dynamic?> response = await service.GetByIdAggregateAsync(id);
             return StatusCode(response.StatusCode, response.Result);
         }
@@ -52,6 +55,14 @@ namespace api_clinic.src.Controllers
         public async Task<IActionResult> Update([FromBody] UpdateUserDTO user)
         {
             if (user == null) return BadRequest("Dados inválidos.");
+
+            if (string.IsNullOrEmpty(user.Id))
+            {
+                user.Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                    ?? User.FindFirst("sub")?.Value 
+                    ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+                    ?? "";
+            }
 
             ResponseApi<User?> response = await service.UpdateAsync(user);
             return StatusCode(response.StatusCode, response.Result);
@@ -72,7 +83,10 @@ namespace api_clinic.src.Controllers
         public async Task<IActionResult> ProfilePhoto([FromForm] ProfilePhotoDTO request)
         {
             if (request == null) return BadRequest("Dados inválidos.");
-            request.Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            request.Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value 
+                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+                ?? "";
             ResponseApi<string> response = await service.ProfilePhotoAsync(request);
             return StatusCode(response.StatusCode, response.Result);
         }
@@ -82,7 +96,10 @@ namespace api_clinic.src.Controllers
         public async Task<IActionResult> RemoveProfilePhoto([FromForm] ProfilePhotoDTO request)
         {
             if (request == null) return BadRequest("Dados inválidos.");
-            request.Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            request.Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                ?? User.FindFirst("sub")?.Value 
+                ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+                ?? "";
             ResponseApi<string> response = await service.RemoveProfilePhotoAsync(request);
             return StatusCode(response.StatusCode, response.Result);
         }

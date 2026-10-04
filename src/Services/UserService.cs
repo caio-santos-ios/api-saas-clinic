@@ -113,7 +113,14 @@ namespace api_clinic.src.Services
                 user.Data.Email = request.Email;
                 user.Data.Name = request.Name;
                 user.Data.Phone = request.Phone;
-                user.Data.ClinicId = request.ClinicId;
+                if (!string.IsNullOrEmpty(request.Photo))
+                {
+                    user.Data.Photo = request.Photo;
+                }
+                if (!string.IsNullOrWhiteSpace(request.ClinicId))
+                {
+                    user.Data.ClinicId = request.ClinicId;
+                }
                 user.Data.Blocked = request.Blocked;
                 user.Data.Admin = request.Admin;
                 if (request.Admin) user.Data.AccessProfile = "admin";

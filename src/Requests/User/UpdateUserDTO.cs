@@ -14,7 +14,8 @@ namespace api_clinic.src.Requests
         [Display(Order = 2)]
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;    
+        public string Phone { get; set; } = string.Empty;
+        public string Photo { get; set; } = string.Empty;
         public bool Admin { get; set; } = false;
         public string ClinicId { get; set; } = string.Empty;
         public bool Blocked { get; set; } = false;
