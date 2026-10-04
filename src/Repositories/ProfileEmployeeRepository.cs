@@ -9,34 +9,34 @@ using MongoDB.Driver;
 
 namespace api_clinic.src.Repository
 {
-    public class ProfileDoctorRepository(AppDbContext context) : IProfileDoctorRepository
+    public class ProfileEmployeeRepository(AppDbContext context) : IProfileEmployeeRepository
     {
-        public async Task<ProfileDoctor?> CreateAsync(ProfileDoctor entity)
+        public async Task<ProfileEmployee?> CreateAsync(ProfileEmployee entity)
         {
-            await context.ProfileDoctors.InsertOneAsync(entity);
+            await context.ProfileEmployees.InsertOneAsync(entity);
             return entity;
         }
 
-        public async Task<ProfileDoctor?> UpdateAsync(ProfileDoctor entity)
+        public async Task<ProfileEmployee?> UpdateAsync(ProfileEmployee entity)
         {
-            await context.ProfileDoctors.ReplaceOneAsync(x => x.Id == entity.Id, entity);
+            await context.ProfileEmployees.ReplaceOneAsync(x => x.Id == entity.Id, entity);
             return entity;
         }
 
-        public async Task<ProfileDoctor> DeleteAsync(ProfileDoctor entity)
+        public async Task<ProfileEmployee> DeleteAsync(ProfileEmployee entity)
         {
-            await context.ProfileDoctors.ReplaceOneAsync(x => x.Id == entity.Id, entity);
+            await context.ProfileEmployees.ReplaceOneAsync(x => x.Id == entity.Id, entity);
             return entity;
         }
 
-        public async Task<ProfileDoctor?> GetByIdAsync(string id)
+        public async Task<ProfileEmployee?> GetByIdAsync(string id)
         {
-            return await context.ProfileDoctors.Find(x => x.Id == id && !x.Deleted).FirstOrDefaultAsync();
+            return await context.ProfileEmployees.Find(x => x.Id == id && !x.Deleted).FirstOrDefaultAsync();
         }
 
-        public async Task<ProfileDoctor?> GetByUserIdAsync(string userId)
+        public async Task<ProfileEmployee?> GetByUserIdAsync(string userId)
         {
-            return await context.ProfileDoctors.Find(x => x.UserId == userId && !x.Deleted).FirstOrDefaultAsync();
+            return await context.ProfileEmployees.Find(x => x.UserId == userId && !x.Deleted).FirstOrDefaultAsync();
         }
 
         public async Task<ResponseApi<List<dynamic>>> GetAllAsync(PaginationUtil<User> pagination, string clinicId)
@@ -45,7 +45,7 @@ namespace api_clinic.src.Repository
             {
                 BsonDocument matchDoc = new()
                 {
-                    { "accessProfile", "doctor" },
+                    { "accessProfile", "clinic-employee" },
                     { "deleted", false }
                 };
 
@@ -70,10 +70,10 @@ namespace api_clinic.src.Repository
                     {
                         { "id", new BsonDocument("$toString", "$_id") }
                     }),
-                    MongoUtil.Lookup("profile_doctors", ["$_id"], ["$userId"], "_profileDoctor", [["deleted", false]], 1),
+                    MongoUtil.Lookup("profile_employees", ["$_id"], ["$userId"], "_profileEmployee", [["deleted", false]], 1),
                     new("$addFields", new BsonDocument
                     {
-                        { "profile", MongoUtil.First("_profileDoctor") }
+                        { "profile", MongoUtil.First("_profileEmployee") }
                     }),
                     new("$project", new BsonDocument
                     {
@@ -86,12 +86,12 @@ namespace api_clinic.src.Repository
                         { "blocked", "$blocked" },
                         { "clinicId", "$clinicId" },
                         { "createdAt", "$createdAt" },
-                        { "specialty", MongoUtil.ValidateNull("profile.specialty", "") },
-                        { "licenseNumber", MongoUtil.ValidateNull("profile.licenseNumber", "") },
-                        { "licenseState", MongoUtil.ValidateNull("profile.licenseState", "") },
-                        { "bio", MongoUtil.ValidateNull("profile.bio", "") },
+                        { "role", MongoUtil.ValidateNull("profile.role", "") },
+                        { "cpf", MongoUtil.ValidateNull("profile.cpf", "") },
+                        { "registrationNumber", MongoUtil.ValidateNull("profile.registrationNumber", "") },
+                        { "hireDate", "$profile.hireDate" },
                         { "address", "$profile.address" },
-                        { "profileDoctorId", MongoUtil.ToString("$profile._id") }
+                        { "profileEmployeeId", MongoUtil.ToString("$profile._id") }
                     })
                 ];
 
@@ -111,7 +111,7 @@ namespace api_clinic.src.Repository
             {
                 BsonDocument matchDoc = new()
                 {
-                    { "accessProfile", "doctor" },
+                    { "accessProfile", "clinic-employee" },
                     { "deleted", false },
                     { "blocked", false }
                 };
@@ -128,10 +128,10 @@ namespace api_clinic.src.Repository
                     {
                         { "id", new BsonDocument("$toString", "$_id") }
                     }),
-                    MongoUtil.Lookup("profile_doctors", ["$_id"], ["$userId"], "_profileDoctor", [["deleted", false]], 1),
+                    MongoUtil.Lookup("profile_employees", ["$_id"], ["$userId"], "_profileEmployee", [["deleted", false]], 1),
                     new("$addFields", new BsonDocument
                     {
-                        { "profile", MongoUtil.First("_profileDoctor") }
+                        { "profile", MongoUtil.First("_profileEmployee") }
                     }),
                     new("$project", new BsonDocument
                     {
@@ -141,9 +141,7 @@ namespace api_clinic.src.Repository
                         { "email", "$email" },
                         { "phone", "$phone" },
                         { "photo", "$photo" },
-                        { "specialty", MongoUtil.ValidateNull("profile.specialty", "") },
-                        { "licenseNumber", MongoUtil.ValidateNull("profile.licenseNumber", "") },
-                        { "licenseState", MongoUtil.ValidateNull("profile.licenseState", "") }
+                        { "role", MongoUtil.ValidateNull("profile.role", "") }
                     }),
                     new("$sort", new BsonDocument("name", 1))
                 ];
@@ -162,7 +160,7 @@ namespace api_clinic.src.Repository
         {
             BsonDocument matchDoc = new()
             {
-                { "accessProfile", "doctor" },
+                { "accessProfile", "clinic-employee" },
                 { "deleted", false }
             };
 
@@ -201,10 +199,10 @@ namespace api_clinic.src.Repository
                 {
                     { "id", new BsonDocument("$toString", "$_id") }
                 }),
-                MongoUtil.Lookup("profile_doctors", ["$_id"], ["$userId"], "_profileDoctor", [["deleted", false]], 1),
+                MongoUtil.Lookup("profile_employees", ["$_id"], ["$userId"], "_profileEmployee", [["deleted", false]], 1),
                 new("$addFields", new BsonDocument
                 {
-                    { "profile", MongoUtil.First("_profileDoctor") }
+                    { "profile", MongoUtil.First("_profileEmployee") }
                 }),
                 new("$project", new BsonDocument
                 {
@@ -217,12 +215,12 @@ namespace api_clinic.src.Repository
                     { "blocked", "$blocked" },
                     { "clinicId", "$clinicId" },
                     { "createdAt", "$createdAt" },
-                    { "specialty", MongoUtil.ValidateNull("profile.specialty", "") },
-                    { "licenseNumber", MongoUtil.ValidateNull("profile.licenseNumber", "") },
-                    { "licenseState", MongoUtil.ValidateNull("profile.licenseState", "") },
-                    { "bio", MongoUtil.ValidateNull("profile.bio", "") },
+                    { "role", MongoUtil.ValidateNull("profile.role", "") },
+                    { "cpf", MongoUtil.ValidateNull("profile.cpf", "") },
+                    { "registrationNumber", MongoUtil.ValidateNull("profile.registrationNumber", "") },
+                    { "hireDate", "$profile.hireDate" },
                     { "address", "$profile.address" },
-                    { "profileDoctorId", MongoUtil.ToString("$profile._id") }
+                    { "profileEmployeeId", MongoUtil.ToString("$profile._id") }
                 })
             ];
 
