@@ -37,7 +37,7 @@ namespace api_clinic.src.Infraestructure
         public IMongoCollection<Plan> Plans => Database.GetCollection<Plan>("plans");
         public IMongoCollection<Clinic> Clinics => Database.GetCollection<Clinic>("clinics");
         public IMongoCollection<Signature> Signatures => Database.GetCollection<Signature>("signatures");
-        public IMongoCollection<ProfileDoctor> ProfileDoctors => Database.GetCollection<ProfileDoctor>("profileDoctors");
+        public IMongoCollection<ProfileDoctor> ProfileDoctors => Database.GetCollection<ProfileDoctor>("profile_doctors");
     }
 }
 
