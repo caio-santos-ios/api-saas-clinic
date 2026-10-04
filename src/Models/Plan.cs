@@ -12,19 +12,28 @@ namespace api_clinic.src.Models
         [BsonElement("name")]
         public string Name { get; set; } = string.Empty;
 
-        [BsonElement("type")]
-        public string Type { get; set; } = string.Empty;
-        
-        [BsonElement("status")]
-        public string Status { get; set; } = "PENDENTE";
-
-        [BsonElement("cost")]
-        public decimal Cost { get; set; } = 0;
-
-        [BsonElement("cycle")]
-        public string Cycle { get; set; } = "monthly";
-
         [BsonElement("description")]
         public string Description { get; set; } = string.Empty;
+
+        [BsonElement("features")]
+        public List<string> Features { get; set; } = [];
+
+        [BsonElement("price")]
+        public decimal Price { get; set; } = 0;
+
+        [BsonElement("trialDays")]
+        public int TrialDays { get; set; }
+    }
+
+    public class LimitPlan
+    {
+        [BsonElement("maxPatients")]
+        public int MaxPatients { get; set; }
+
+        [BsonElement("maxDoctors")]
+        public int MaxDoctors { get; set; }
+        
+        [BsonElement("maxStaff")]
+        public int MaxStaff { get; set; }
     }
 }
