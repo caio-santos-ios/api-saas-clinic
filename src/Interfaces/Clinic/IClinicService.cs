@@ -8,6 +8,7 @@ namespace api_clinic.src.Interfaces
     public interface IClinicService
     {
         Task<ResponseApi<PaginationApi<List<dynamic>>>> GetAllAsync(GetAllDTO request);
+        Task<ResponseApi<List<dynamic>>> GetSelectAsync(GetAllDTO request);
         Task<ResponseApi<dynamic?>> GetByIdAggregateAsync(string id);
         Task<ResponseApi<Clinic?>> CreateAsync(CreateClinicRequest request);
         Task<ResponseApi<Clinic?>> UpdateAsync(UpdateClinicRequest request);

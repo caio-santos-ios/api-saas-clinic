@@ -26,6 +26,20 @@ namespace api_clinic.src.Services
             }
         }
 
+        public async Task<ResponseApi<List<dynamic>>> GetSelectAsync(GetAllDTO request)
+        {
+            try
+            {
+                PaginationUtil<Plan> pagination = new(request.QueryParams);
+                ResponseApi<List<dynamic>> plans = await repository.GetSelectAsync(pagination);
+                return new(plans.Data, 200, "Planos listados com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde. {ex.Message}");
+            }
+        }
+
         public async Task<ResponseApi<dynamic?>> GetByIdAggregateAsync(string id)
         {
             try

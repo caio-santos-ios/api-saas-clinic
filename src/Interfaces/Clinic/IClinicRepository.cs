@@ -8,6 +8,7 @@ namespace api_clinic.src.Interfaces
     public interface IClinicRepository
     {
         Task<ResponseApi<List<dynamic>>> GetAllAsync(PaginationUtil<Clinic> pagination);
+        Task<ResponseApi<List<dynamic>>> GetSelectAsync(PaginationUtil<Clinic> pagination);
         Task<int> GetCountDocumentsAsync(PaginationUtil<Clinic> pagination);
         Task<dynamic?> GetByIdAggregateAsync(string id);
         Task<List<dynamic>> GetAllAsync(List<BsonDocument> pipeline);

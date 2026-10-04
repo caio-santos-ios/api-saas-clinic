@@ -43,6 +43,28 @@ namespace api_clinic.src.Repository
                         {"id", new BsonDocument("$toString", "$_id")},                        
                     }),
 
+                    new("$lookup", new BsonDocument
+                    {
+                        {"from", "clinics"},
+                        {"let", new BsonDocument("cId", "$clinicId")},
+                        {"pipeline", new BsonArray
+                        {
+                            new BsonDocument("$match", new BsonDocument("$expr", new BsonDocument("$and", new BsonArray
+                            {
+                                new BsonDocument("$eq", new BsonArray{new BsonDocument("$toString", "$_id"), "$$cId"}),
+                                new BsonDocument("$eq", new BsonArray{"$deleted", false})
+                            }))),
+                            new BsonDocument("$project", new BsonDocument
+                            {
+                                {"tradeName", 1},
+                                {"corporateName", 1},
+                                {"cnpj", 1}
+                            })
+                        }},
+                        {"as", "clinic"}
+                    }),
+                    new("$unwind", new BsonDocument{{"path", "$clinic"}, {"preserveNullAndEmptyArrays", true}}),
+
                     new("$project", new BsonDocument
                     {
                         {"_id", 0},
@@ -150,26 +172,11 @@ namespace api_clinic.src.Repository
         {
             List<BsonDocument> pipeline = new()
             {
-                new("$match", pagination.PipelineFilter),
-                new("$sort", pagination.PipelineSort),
-                new("$addFields", new BsonDocument
-                {
-                    {"id", new BsonDocument("$toString", "$_id")},
-                }),
-                new("$project", new BsonDocument
-                {
-                    {"_id", 0},
-                    {"password", 0},
-                    {"role", 0},
-                    {"blocked", 0},
-                    {"codeAccess", 0},
-                    {"validatedAccess", 0}
-                }),
-                new("$sort", pagination.PipelineSort),
+                new("$match", pagination.PipelineFilter)
             };
 
             List<BsonDocument> results = await context.Users.Aggregate<BsonDocument>(pipeline).ToListAsync();
-            return results.Select(doc => BsonSerializer.Deserialize<dynamic>(doc)).Count();
+            return results.Count;
         }
         #endregion
         #region UPDATE

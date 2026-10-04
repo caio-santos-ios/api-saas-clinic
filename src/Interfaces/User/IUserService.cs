@@ -19,5 +19,6 @@ namespace api_clinic.src.Interfaces
         Task<ResponseApi<string>> ProfilePhotoAsync(ProfilePhotoDTO request);
         Task<ResponseApi<string>> RemoveProfilePhotoAsync(ProfilePhotoDTO request);
         Task<ResponseApi<User>> DeleteAsync(DeleteDTO request);
+        Task<ResponseApi<User?>> ToggleBlockAsync(string id);
     }
 }

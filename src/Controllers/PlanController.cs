@@ -21,6 +21,13 @@ namespace api_clinic.src.Controllers
             return StatusCode(response.StatusCode, response.Result);
         }
 
+        [HttpGet("select")]
+        public async Task<IActionResult> GetSelect()
+        {
+            ResponseApi<List<dynamic>> response = await service.GetSelectAsync(new(Request.Query));
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByIdAsync(string id)
         {

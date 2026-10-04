@@ -84,6 +84,39 @@ namespace api_clinic.src.Repository
             }
         }
 
+        public async Task<ResponseApi<List<dynamic>>> GetSelectAsync(PaginationUtil<Clinic> pagination)
+        {
+            try
+            {
+                List<BsonDocument> pipeline = new()
+                {
+                    new("$match", pagination.PipelineFilter),
+                    new("$addFields", new BsonDocument
+                    {
+                        {"id", new BsonDocument("$toString", "$_id")}
+                    }),
+                    new("$project", new BsonDocument
+                    {
+                        {"_id", 0},
+                        {"id", 1},
+                        {"tradeName", 1},
+                        {"corporateName", 1},
+                        {"cnpj", 1},
+                        {"active", 1}
+                    }),
+                    new("$sort", new BsonDocument("tradeName", 1))
+                };
+
+                List<BsonDocument> results = await context.Clinics.Aggregate<BsonDocument>(pipeline).ToListAsync();
+                List<dynamic> list = results.Select(doc => BsonSerializer.Deserialize<dynamic>(doc)).ToList();
+                return new(list);
+            }
+            catch
+            {
+                return new(null, 500, "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.");
+            }
+        }
+
         public async Task<int> GetCountDocumentsAsync(PaginationUtil<Clinic> pagination)
         {
             List<BsonDocument> pipeline = new()

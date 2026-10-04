@@ -13,5 +13,9 @@ namespace api_clinic.src.Requests
         [Required(ErrorMessage = "A Senha é obrigatória.")]
         public string Password { get; set; } = string.Empty;
         public bool Admin { get; set; } = false;
+        public string Phone { get; set; } = string.Empty;
+        public string ClinicId { get; set; } = string.Empty;
+        public string AccessProfile { get; set; } = string.Empty;
+        public bool Blocked { get; set; } = false;
     }
 }

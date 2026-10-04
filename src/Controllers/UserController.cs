@@ -98,6 +98,14 @@ namespace api_clinic.src.Controllers
         }
 
         [Authorize]
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> ToggleStatus(string id)
+        {
+            ResponseApi<User?> response = await service.ToggleBlockAsync(id);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(string id)
         {

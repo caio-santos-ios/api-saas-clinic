@@ -72,19 +72,21 @@ namespace api_clinic.src.Services
                 {
                     Email = request.Email,
                     Name = request.Name,
+                    Phone = request.Phone,
+                    ClinicId = request.ClinicId,
                     Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
                     CodeAccess = access.CodeAccess,
                     CodeAccessExpiration = access.CodeAccessExpiration,
-                    ValidatedAccess = false,
+                    ValidatedAccess = true,
                     Admin = request.Admin,
+                    AccessProfile = request.AccessProfile,
+                    Blocked = request.Blocked,
                 };
 
                 ResponseApi<User?> response = await repository.CreateAsync(user);
                 if (response.Data is null) return new(null, 400, "Falha ao criar conta.");
 
-                await mailHelper.SendAccountConfirmationMail(request.Email, user.Name, access.CodeAccess);
-
-                return new(null, 201, "Usuário criado com sucesso.");
+                return new(response.Data, 201, "Usuário criado com sucesso.");
             }
             catch
             {
@@ -111,11 +113,36 @@ namespace api_clinic.src.Services
                 user.Data.Email = request.Email;
                 user.Data.Name = request.Name;
                 user.Data.Phone = request.Phone;
+                user.Data.ClinicId = request.ClinicId;
+                user.Data.Blocked = request.Blocked;
+                user.Data.Admin = request.Admin;
+                if (request.Admin) user.Data.AccessProfile = "admin";
 
                 ResponseApi<User?> response = await repository.UpdateAsync(user.Data);
                 if (!response.IsSuccess) return new(null, 400, "Falha ao atualizar");
 
                 return new(response.Data, 200, "Atualizado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde. {ex.Message}");
+            }
+        }
+
+        public async Task<ResponseApi<User?>> ToggleBlockAsync(string id)
+        {
+            try
+            {
+                ResponseApi<User?> user = await repository.GetByIdAsync(id);
+                if (user.Data is null) return new(null, 404, "Usuário não encontrado");
+
+                user.Data.Blocked = !user.Data.Blocked;
+                user.Data.UpdatedAt = DateTime.UtcNow;
+
+                ResponseApi<User?> response = await repository.UpdateAsync(user.Data);
+                if (!response.IsSuccess) return new(null, 400, "Falha ao alterar status do usuário");
+
+                return new(response.Data, 200, user.Data.Blocked ? "Usuário bloqueado com sucesso" : "Usuário desbloqueado com sucesso");
             }
             catch (Exception ex)
             {
