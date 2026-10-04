@@ -82,7 +82,7 @@ namespace api_clinic.src.Services
             {
                 Signature? signature = await repository.GetByClinicIdAsync(clinicId);
                 if (signature is null) return new(null, 404, "Assinatura da clínica não encontrada");
-                return new();
+                return new(signature, 200, "Assinatura da clínica encontrada");
             }
             catch (Exception ex)
             {

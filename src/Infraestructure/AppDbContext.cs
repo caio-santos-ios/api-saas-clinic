@@ -38,6 +38,10 @@ namespace api_clinic.src.Infraestructure
         public IMongoCollection<Clinic> Clinics => Database.GetCollection<Clinic>("clinics");
         public IMongoCollection<Signature> Signatures => Database.GetCollection<Signature>("signatures");
         public IMongoCollection<ProfileDoctor> ProfileDoctors => Database.GetCollection<ProfileDoctor>("profile_doctors");
+        public IMongoCollection<ProfileEmployee> ProfileEmployees => Database.GetCollection<ProfileEmployee>("profile_employees");
+        public IMongoCollection<ProfilePatient> ProfilePatients => Database.GetCollection<ProfilePatient>("profile_patients");
+        public IMongoCollection<Procedure> Procedures => Database.GetCollection<Procedure>("procedures");
+        public IMongoCollection<Appointment> Appointments => Database.GetCollection<Appointment>("appointments");
     }
 }
 

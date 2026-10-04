@@ -13,6 +13,7 @@ namespace api_clinic.src.Controllers
     public class ClinicController(IClinicService service) : ControllerBase
     {
         private string UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+        private string ClinicId => User.FindFirst("clinicId")?.Value ?? "";
 
         [Authorize]
         [HttpGet]
@@ -27,6 +28,15 @@ namespace api_clinic.src.Controllers
         public async Task<IActionResult> GetSelect()
         {
             ResponseApi<List<dynamic>> response = await service.GetSelectAsync(new(Request.Query));
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [Authorize]
+        [HttpGet("my-clinic")]
+        public async Task<IActionResult> GetMyClinic()
+        {
+            if (string.IsNullOrEmpty(ClinicId)) return BadRequest("Clínica não vinculada ao usuário.");
+            ResponseApi<dynamic?> response = await service.GetByIdAggregateAsync(ClinicId);
             return StatusCode(response.StatusCode, response.Result);
         }
 
