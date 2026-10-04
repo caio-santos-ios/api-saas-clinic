@@ -23,6 +23,9 @@ namespace api_clinic.src.Models
 
         [BsonElement("trialDays")]
         public int TrialDays { get; set; }
+
+        [BsonElement("limits")]
+        public LimitPlan Limits { get; set; } = new();
     }
 
     public class LimitPlan

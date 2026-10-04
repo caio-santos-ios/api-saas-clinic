@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using api_clinic.src.Models;
 
 namespace api_clinic.src.Requests.Plan
 {
@@ -7,16 +8,15 @@ namespace api_clinic.src.Requests.Plan
         [Required(ErrorMessage = "O Nome é obrigatório.")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "O Tipo é obrigatório.")]
-        public string Type { get; set; } = string.Empty;
-
-        public string Status { get; set; } = "ATIVO";
-
-        [Required(ErrorMessage = "O Valor é obrigatório.")]
-        public decimal Cost { get; set; } = 0;
-
-        public string Cycle { get; set; } = "monthly";
-
         public string Description { get; set; } = string.Empty;
+
+        public List<string> Features { get; set; } = [];
+
+        [Required(ErrorMessage = "O Preço é obrigatório.")]
+        public decimal Price { get; set; } = 0;
+
+        public int TrialDays { get; set; }
+
+        public LimitPlan Limits { get; set; } = new();
     }
 }

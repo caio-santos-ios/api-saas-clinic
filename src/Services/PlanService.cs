@@ -49,11 +49,11 @@ namespace api_clinic.src.Services
                 Plan entity = new()
                 {
                     Name = request.Name,
-                    Type = request.Type,
-                    Status = request.Status,
-                    Cost = request.Cost,
-                    Cycle = request.Cycle,
                     Description = request.Description,
+                    Features = request.Features ?? [],
+                    Price = request.Price,
+                    TrialDays = request.TrialDays,
+                    Limits = request.Limits ?? new(),
                     CreatedBy = request.CreatedBy,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -80,11 +80,11 @@ namespace api_clinic.src.Services
                 if (existed is null) return new(null, 404, "Plano não encontrado");
 
                 if (!string.IsNullOrEmpty(request.Name)) existed.Name = request.Name;
-                if (!string.IsNullOrEmpty(request.Type)) existed.Type = request.Type;
-                if (!string.IsNullOrEmpty(request.Status)) existed.Status = request.Status;
-                if (request.Cost.HasValue) existed.Cost = request.Cost.Value;
-                if (!string.IsNullOrEmpty(request.Cycle)) existed.Cycle = request.Cycle;
                 if (request.Description is not null) existed.Description = request.Description;
+                if (request.Features is not null) existed.Features = request.Features;
+                if (request.Price.HasValue) existed.Price = request.Price.Value;
+                if (request.TrialDays.HasValue) existed.TrialDays = request.TrialDays.Value;
+                if (request.Limits is not null) existed.Limits = request.Limits;
                 if (request.Active.HasValue) existed.Active = request.Active.Value;
 
                 existed.UpdatedAt = DateTime.UtcNow;

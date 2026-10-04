@@ -109,7 +109,7 @@ namespace api_clinic.src.Services
                     Status = request.Status,
                     PaymentMethod = request.PaymentMethod,
                     Cycle = request.Cycle,
-                    Value = request.Value > 0 ? request.Value : plan.Cost,
+                    Value = request.Value > 0 ? request.Value : plan.Price,
                     StartDate = request.StartDate,
                     EndDate = request.EndDate,
                     NextDueDate = request.NextDueDate ?? request.StartDate.AddMonths(request.Cycle == "yearly" ? 12 : 1),
@@ -312,7 +312,7 @@ namespace api_clinic.src.Services
                 decimal value;
                 if (plan is not null)
                 {
-                    value = plan.Cost;
+                    value = plan.Price;
                 }
                 else
                 {
