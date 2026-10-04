@@ -24,6 +24,14 @@ namespace api_clinic.src.Controllers
         }
 
         [Authorize]
+        [HttpGet("select")]
+        public async Task<IActionResult> GetSelect()
+        {
+            ResponseApi<List<dynamic>> response = await service.GetSelectAsync(ClinicId);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByIdAsync(string id)
         {

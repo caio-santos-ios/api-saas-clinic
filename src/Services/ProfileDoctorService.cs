@@ -28,6 +28,19 @@ namespace api_clinic.src.Services
             }
         }
 
+        public async Task<ResponseApi<List<dynamic>>> GetSelectAsync(string clinicId)
+        {
+            try
+            {
+                ResponseApi<List<dynamic>> result = await repository.GetSelectAsync(clinicId);
+                return new(result.Data, 200, "Médicos listados com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde. {ex.Message}");
+            }
+        }
+
         public async Task<ResponseApi<dynamic?>> GetByIdAggregateAsync(string id)
         {
             try

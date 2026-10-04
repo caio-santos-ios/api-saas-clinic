@@ -105,6 +105,59 @@ namespace api_clinic.src.Repository
             }
         }
 
+        public async Task<ResponseApi<List<dynamic>>> GetSelectAsync(string clinicId)
+        {
+            try
+            {
+                BsonDocument matchDoc = new()
+                {
+                    { "accessProfile", "doctor" },
+                    { "deleted", false },
+                    { "blocked", false }
+                };
+
+                if (!string.IsNullOrEmpty(clinicId))
+                {
+                    matchDoc.Add("clinicId", clinicId);
+                }
+
+                List<BsonDocument> pipeline =
+                [
+                    new("$match", matchDoc),
+                    new("$addFields", new BsonDocument
+                    {
+                        { "id", new BsonDocument("$toString", "$_id") }
+                    }),
+                    MongoUtil.Lookup("profileDoctors", ["$_id"], ["$userId"], "_profileDoctor", [["deleted", false]], 1),
+                    new("$addFields", new BsonDocument
+                    {
+                        { "profile", MongoUtil.First("_profileDoctor") }
+                    }),
+                    new("$project", new BsonDocument
+                    {
+                        { "_id", 0 },
+                        { "id", "$id" },
+                        { "name", "$name" },
+                        { "email", "$email" },
+                        { "phone", "$phone" },
+                        { "photo", "$photo" },
+                        { "specialty", MongoUtil.ValidateNull("profile.specialty", "") },
+                        { "licenseNumber", MongoUtil.ValidateNull("profile.licenseNumber", "") },
+                        { "licenseState", MongoUtil.ValidateNull("profile.licenseState", "") }
+                    }),
+                    new("$sort", new BsonDocument("name", 1))
+                ];
+
+                List<BsonDocument> results = await context.Users.Aggregate<BsonDocument>(pipeline).ToListAsync();
+                List<dynamic> list = results.Select(doc => BsonSerializer.Deserialize<dynamic>(doc)).ToList();
+                return new(list);
+            }
+            catch
+            {
+                return new(null, 500, "Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.");
+            }
+        }
+
         public async Task<int> GetCountDocumentsAsync(PaginationUtil<User> pagination, string clinicId)
         {
             BsonDocument matchDoc = new()

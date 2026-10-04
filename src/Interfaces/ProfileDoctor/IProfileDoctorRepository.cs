@@ -7,6 +7,7 @@ namespace api_clinic.src.Interfaces
     public interface IProfileDoctorRepository
     {
         Task<ResponseApi<List<dynamic>>> GetAllAsync(PaginationUtil<User> pagination, string clinicId);
+        Task<ResponseApi<List<dynamic>>> GetSelectAsync(string clinicId);
         Task<int> GetCountDocumentsAsync(PaginationUtil<User> pagination, string clinicId);
         Task<dynamic?> GetByIdAggregateAsync(string id);
         Task<ProfileDoctor?> GetByUserIdAsync(string userId);

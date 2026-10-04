@@ -7,6 +7,7 @@ namespace api_clinic.src.Interfaces
     public interface IProfileDoctorService
     {
         Task<ResponseApi<PaginationApi<List<dynamic>>>> GetAllAsync(GetAllDTO request, string clinicId);
+        Task<ResponseApi<List<dynamic>>> GetSelectAsync(string clinicId);
         Task<ResponseApi<dynamic?>> GetByIdAggregateAsync(string id);
         Task<ResponseApi<dynamic?>> CreateAsync(CreateProfileDoctorRequest request);
         Task<ResponseApi<dynamic?>> UpdateAsync(UpdateProfileDoctorRequest request);
