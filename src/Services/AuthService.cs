@@ -26,6 +26,9 @@ namespace api_clinic.src.Services
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
+                    return new(null, 400, "A senha deve conter no mínimo 8 caracteres.");
+
                 ResponseApi<User?> existed = await userRepository.GetByEmailAsync(request.Email);
                 if (existed.Data is not null) return new(null, 400, "E-mail inválido, tente usar outro");
 
@@ -92,6 +95,9 @@ namespace api_clinic.src.Services
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
+                    return new(null, 400, "A senha deve conter no mínimo 8 caracteres.");
+
                 ResponseApi<User?> existed = await userRepository.GetByEmailAsync(request.Email);
                 if (existed.Data is not null) return new(null, 400, "E-mail inválido, tente usar outro");
 
@@ -224,6 +230,9 @@ namespace api_clinic.src.Services
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
+                    return new(null, 400, "A senha deve conter no mínimo 8 caracteres.");
+
                 ResponseApi<User?> response = await userRepository.GetByCodeAsync(request.Code);
                 if (response.Data is null) return new(null, 400, "Código inválido");
 
