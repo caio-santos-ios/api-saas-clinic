@@ -62,6 +62,9 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IProfilePatientService, ProfilePatientService>();
             builder.Services.AddTransient<IProfilePatientRepository, ProfilePatientRepository>();
 
+            builder.Services.AddTransient<IAppointmentService, AppointmentService>();
+            builder.Services.AddTransient<IAppointmentRepository, AppointmentRepository>();
+
             builder.Services.AddSingleton<AsaasHandler>();
             builder.Services.AddHttpClient<UploadHelper>();
         }
