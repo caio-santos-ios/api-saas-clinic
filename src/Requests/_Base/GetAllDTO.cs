@@ -9,6 +9,12 @@ namespace api_clinic.src.Shared.DTOs
                 QueryParams.Add(query.Key, query.Value!);
             }
         }
+
+        public GetAllDTO(Dictionary<string, string> queries)
+        {
+            QueryParams = queries;
+        }
+
         public Dictionary<string, string> QueryParams { get; set; } = [];
 
     }

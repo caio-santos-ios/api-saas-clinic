@@ -23,6 +23,16 @@ namespace api_clinic.src.Controllers
         }
 
         [Authorize]
+        [HttpGet("my-appointments")]
+        public async Task<IActionResult> GetMyAppointments()
+        {
+            var query = Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+            query["doctorId"] = UserId;
+            ResponseApi<PaginationApi<List<dynamic>>> response = await service.GetAllAsync(new(query), ClinicId);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByIdAsync(string id)
         {
