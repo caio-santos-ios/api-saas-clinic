@@ -53,6 +53,9 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IProfileDoctorService, ProfileDoctorService>();
             builder.Services.AddTransient<IProfileDoctorRepository, ProfileDoctorRepository>();
 
+            builder.Services.AddTransient<IProcedureService, ProcedureService>();
+            builder.Services.AddTransient<IProcedureRepository, ProcedureRepository>();
+
             builder.Services.AddSingleton<AsaasHandler>();
             builder.Services.AddHttpClient<UploadHelper>();
         }
