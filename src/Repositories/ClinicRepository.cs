@@ -34,6 +34,11 @@ namespace api_clinic.src.Repository
             Clinic? entity = await context.Clinics.Find(x => x.Id == id && !x.Deleted).FirstOrDefaultAsync();
             return entity;
         }
+        public async Task<Clinic?> GetByCNPJAsync(string cnpj)
+        {
+            Clinic? entity = await context.Clinics.Find(x => x.Cnpj == cnpj && !x.Deleted).FirstOrDefaultAsync();
+            return entity;
+        }
         public async Task<int> GetCountDocumentsAsync(List<BsonDocument> pipeline)
         {
             List<BsonDocument> results = await context.Clinics.Aggregate<BsonDocument>(pipeline).ToListAsync();

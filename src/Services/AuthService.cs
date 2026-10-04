@@ -32,6 +32,9 @@ namespace api_clinic.src.Services
                 ResponseApi<User?> existed = await userRepository.GetByEmailAsync(request.Email);
                 if (existed.Data is not null) return new(null, 400, "E-mail inválido, tente usar outro");
 
+                Clinic? existedClinic = await clinicRepository.GetByCNPJAsync(request.Cnpj);
+                if (existedClinic is not null) return new(null, 400, "CNPJ inválido, tente usar outro");
+
                 AsaasCustomerResponse? asaasCustomer = await asaasHandler.GetOrCreateCustomerAsync(request.CorporateName, request.Cnpj, request.Email, request.Phone);
                 if (asaasCustomer is null) return new(null, 400, "E-mail inválido, tente usar outro");
 
