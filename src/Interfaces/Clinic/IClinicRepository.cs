@@ -1,10 +1,15 @@
 using api_clinic.src.Models;
+using api_clinic.src.Models.Base;
+using api_clinic.src.Shared.Utils;
 using MongoDB.Bson;
 
 namespace api_clinic.src.Interfaces
 {
     public interface IClinicRepository
     {
+        Task<ResponseApi<List<dynamic>>> GetAllAsync(PaginationUtil<Clinic> pagination);
+        Task<int> GetCountDocumentsAsync(PaginationUtil<Clinic> pagination);
+        Task<dynamic?> GetByIdAggregateAsync(string id);
         Task<List<dynamic>> GetAllAsync(List<BsonDocument> pipeline);
         Task<dynamic?> GetByIdAggregateAsync(List<BsonDocument> pipeline);
         Task<Clinic?> GetByIdAsync(string id);

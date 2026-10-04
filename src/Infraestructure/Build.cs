@@ -44,6 +44,7 @@ namespace api_clinic.src.Configuration
             builder.Services.AddTransient<IPlanService, PlanService>();
             builder.Services.AddTransient<IPlanRepository, PlanRepository>();
 
+            builder.Services.AddTransient<IClinicService, ClinicService>();
             builder.Services.AddTransient<IClinicRepository, ClinicRepository>();
 
             builder.Services.AddTransient<ISignatureService, SignatureService>();
