@@ -13,5 +13,7 @@ namespace api_clinic.src.Interfaces
         Task<ResponseApi<dynamic?>> ForgotPasswordAsync(ForgotPasswordRequest request);
         Task<ResponseApi<dynamic?>> ResetPasswordAsync(ResetPasswordRequest request);
         Task<ResponseApi<dynamic?>> CleanIncorrectPasswordAsync(CleanIncorrectPasswordRequest request);
+        Task<ResponseApi<dynamic?>> GetThemeByCodeAsync(string code);
+        Task<ResponseApi<dynamic?>> GetThemeByClinicIdAsync(string clinicId);
     }
 }

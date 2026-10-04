@@ -51,7 +51,7 @@ namespace api_clinic.src.Controllers
         public async Task<IActionResult> WebHook([FromBody] AsaasWebhookRequest request)
         {
             var token = Request.Headers["asaas-access-token"].ToString();
-            if (token != Environment.GetEnvironmentVariable("ASAAS_WEBHOOK_TOKEN")) return Unauthorized();
+            if (token != Environment.GetEnvironmentVariable("ASAAS_TOKEN")) return Unauthorized();
 
             if (request == null) return BadRequest("Dados inválidos.");
             ResponseApi<dynamic?> response = await service.ProcessWebhookAsync(request);

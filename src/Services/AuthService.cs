@@ -332,5 +332,39 @@ namespace api_clinic.src.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public async Task<ResponseApi<dynamic?>> GetThemeByCodeAsync(string code)
+        {
+            try
+            {
+                ResponseApi<User?> user = await userRepository.GetByCodeAsync(code);
+                if (user.Data is null || string.IsNullOrEmpty(user.Data.ClinicId))
+                    return new(null, 404, "Tema não encontrado");
+
+                Clinic? clinic = await clinicRepository.GetByIdAsync(user.Data.ClinicId);
+                if (clinic is null) return new(null, 404, "Clínica não encontrada");
+
+                return new(clinic.Setting, 200, "Tema carregado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde - {ex.Message}");
+            }
+        }
+
+        public async Task<ResponseApi<dynamic?>> GetThemeByClinicIdAsync(string clinicId)
+        {
+            try
+            {
+                Clinic? clinic = await clinicRepository.GetByIdAsync(clinicId);
+                if (clinic is null) return new(null, 404, "Clínica não encontrada");
+
+                return new(clinic.Setting, 200, "Tema carregado com sucesso");
+            }
+            catch (Exception ex)
+            {
+                return new(null, 500, $"Ocorreu um erro inesperado. Por favor, tente novamente mais tarde - {ex.Message}");
+            }
+        }
     }
 }

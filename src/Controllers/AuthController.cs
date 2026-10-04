@@ -81,5 +81,23 @@ namespace api_clinic.src.Controllers
             ResponseApi<dynamic?> response = await service.CleanIncorrectPasswordAsync(request);
             return StatusCode(response.StatusCode, response.Result);
         }
+
+        [HttpGet("theme/{code}")]
+        public async Task<IActionResult> GetThemeByCode(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code)) return BadRequest("Código inválido.");
+
+            ResponseApi<dynamic?> response = await service.GetThemeByCodeAsync(code);
+            return StatusCode(response.StatusCode, response.Result);
+        }
+
+        [HttpGet("theme/clinic/{clinicId}")]
+        public async Task<IActionResult> GetThemeByClinicId(string clinicId)
+        {
+            if (string.IsNullOrWhiteSpace(clinicId)) return BadRequest("Id inválido.");
+
+            ResponseApi<dynamic?> response = await service.GetThemeByClinicIdAsync(clinicId);
+            return StatusCode(response.StatusCode, response.Result);
+        }
     }
 }

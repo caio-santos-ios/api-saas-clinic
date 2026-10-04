@@ -32,7 +32,7 @@ namespace api_clinic.src.Helpers
         public static string GetAccountConfirmationTemplate(string? name, string code, Clinic? clinic = null, string? customLink = null)
         {
             string greeting = !string.IsNullOrWhiteSpace(name) ? $"Ol&#225;, <strong>{System.Net.WebUtility.HtmlEncode(name)}</strong>!" : "Ol&#225;!";
-            string link = customLink ?? $"{GetUiUrl()}/confirmation/{code}";
+            string link = customLink ?? (!string.IsNullOrEmpty(clinic?.Id) ? $"{GetUiUrl()}/confirmation/{code}?clinicId={clinic.Id}" : $"{GetUiUrl()}/confirmation/{code}");
             string clinicName = !string.IsNullOrWhiteSpace(clinic?.TradeName) ? clinic.TradeName : "ClinicSaaS";
 
             return BuildTemplate(
@@ -52,7 +52,7 @@ namespace api_clinic.src.Helpers
         public static string GetPasswordResetTemplate(string? name, string code, Clinic? clinic = null, string? customLink = null)
         {
             string greeting = !string.IsNullOrWhiteSpace(name) ? $"Ol&#225;, <strong>{System.Net.WebUtility.HtmlEncode(name)}</strong>!" : "Ol&#225;!";
-            string link = customLink ?? $"{GetUiUrl()}/reset-password/{code}";
+            string link = customLink ?? (!string.IsNullOrEmpty(clinic?.Id) ? $"{GetUiUrl()}/reset-password/{code}?clinicId={clinic.Id}" : $"{GetUiUrl()}/reset-password/{code}");
             string clinicName = !string.IsNullOrWhiteSpace(clinic?.TradeName) ? clinic.TradeName : "ClinicSaaS";
 
             return BuildTemplate(
